@@ -7,6 +7,10 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = "us-west-1"
+}
+
 locals {
   VMsizes = toset([
     "t2.nano",
