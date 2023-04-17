@@ -7,26 +7,38 @@ terraform {
   }
 }
 
-variable "map-aws-regions" {
-  type = map(any)
-  default = {
-    "east1" = {
-      "region1" = "us-east-1",
-    },
-    "west1" = {
-      "region2" = "us-west-1",
-    },
-    "west2" = {
-      "region3" = "us-west-2",
-    },
-  }
+locals {
+  VMsizes = toset([
+    "t2.nano",
+    "t2.micro",
+    "t2.large",
+  ])
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+data "aws_key_pair" "search_for_key_pair" {}
+
 resource "aws_instance" "VMka" {
-  for_each = var.map-aws-regions
-  instance_type = "t2.micro"
-  provider = "${each.value}"
-  
+  for_each = local.VMsizes
+  instance_type = each.key
+  ami = data.aws_ami.ubuntu.id
+  key_name = data.aws_key_pair.search_for_key_pair.key_name
+
   tags = {
     name = "${each.key}"
 }
