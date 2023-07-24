@@ -11,14 +11,6 @@ provider "aws" {
   region = var.region
 }
 
-locals {
-  VMsizes = toset([
-    "t2.nano",
-    "t2.micro",
-    "t2.large",
-  ])
-}
-
 data "aws_ami" "ubuntu" {
   most_recent = true
 
